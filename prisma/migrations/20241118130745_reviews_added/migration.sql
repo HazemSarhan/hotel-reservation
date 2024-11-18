@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Hotel" ADD COLUMN     "average_rating" DOUBLE PRECISION NOT NULL DEFAULT 0,
+ADD COLUMN     "number_of_reviews" DOUBLE PRECISION NOT NULL DEFAULT 0;

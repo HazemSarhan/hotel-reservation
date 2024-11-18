@@ -1,0 +1,121 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @default(uuid())
+  name String
+  email String @unique
+  password String
+  role Roles @default(GUEST)
+  profile_picture String?
+  hotels Hotel[]
+  bookings Booking[]
+  reviews Review[]
+  payments Payment[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Property {
+  id Int @id @default(autoincrement())
+  name String
+  description String?
+  hotels Hotel[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Destination {
+  id Int @id @default(autoincrement())
+  city String
+  state String
+  country String
+  address String
+  description String?
+  hotels Hotel[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Hotel {
+  id Int @id @default(autoincrement())
+  name String
+  description String?
+  location Destination @relation(fields: [destinationId], references: [id])
+  destinationId Int
+  owner User @relation(fields: [ownerId], references: [id])
+  ownerId String
+  property Property @relation(fields: [propertyId], references: [id])
+  propertyId Int
+  images String[]
+  pricePerNight Float
+  average_rating Float @default(0)
+  number_of_reviews Float @default(0)
+  bookings Booking[]
+  reviews Review[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Booking {
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [userId], references: [id])
+  userId String
+  hotel Hotel @relation(fields: [hotelId], references: [id])
+  hotelId Int
+  checkIn DateTime
+  checkOut DateTime
+  totalPrice Float
+  status BookingStatus @default(PENDING)
+  payments Payment[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Review {
+  id Int @id @default(autoincrement())
+  rating Int
+  comment String
+  user User @relation(fields: [userId], references: [id])
+  userId String
+  hotel Hotel @relation(fields: [hotelId], references: [id])
+  hotelId Int
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Payment {
+  id Int @id @default(autoincrement())
+  booking Booking @relation(fields: [bookingId], references: [id])
+  bookingId Int
+  user User @relation(fields: [userId], references: [id])
+  userId String
+  totalPrice Int
+  stripeSessionId String
+  purchased_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+enum Roles {
+  ADMIN
+  MANAGER
+  GUEST
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELED
+}
